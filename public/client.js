@@ -13,7 +13,10 @@ function drawGraph(data) {
             stabilization: false
         },
         nodes: {
-            shape: 'dot'
+            shape: 'triangle'
+            //shapeProperties: {
+            //    size: 2
+            //}
         }
       };
     var graph = new vis.Network(container, data, options);

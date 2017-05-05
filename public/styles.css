@@ -8,9 +8,14 @@
     z-index: 1000;
 }
 
+#graph {
+    height: 900px;
+}
+
 h5 {
     font-size: 20px;
     color: white;
     padding-left: 5px;
-    margin-top: 0px;
+    margin-top: 3px;
+    font-family: 'Orbitron', sans-serif;
 }

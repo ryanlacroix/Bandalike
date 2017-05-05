@@ -1,5 +1,4 @@
 // This file crawls lastfm, creating a graph of related artists
-// Goal: Export the graph for visualization
 
 var express = require('express');
 var request = require('request');
@@ -12,7 +11,7 @@ var ROOT = './public';
 var nodeStack = []
 var visitedNodes = [];
 
-var running = true;
+var pendingRequests = 0;
 
 var Node = function(artist) {
     return {
@@ -27,7 +26,7 @@ function createGraphObj(visitedNodes) {
     var nodes = [];
     var edges = [];
     for (var i = 0; i < visitedNodes.length; i++) {
-        newNode = {id: visitedNodes[i].artist, label: visitedNodes[i].artist};
+        newNode = {id: visitedNodes[i].artist, label: visitedNodes[i].artist, size: 5};
         if (!alreadyContains(newNode, nodes)) {
             nodes.push(newNode);
             // Add edges from this node to all of its children
@@ -41,11 +40,10 @@ function createGraphObj(visitedNodes) {
     return {nodes: nodes, edges: edges};
 }
 
+// Check if node is contained in lis
 function alreadyContains(node, lis) {
     for (var i = 0; i < lis.length; i++) {
-        console.log(node.id + "   " + lis[i].id);
         if (node.id === lis[i].id) {
-            console.log('duplicate found');
             return true;
         }
     }
@@ -62,10 +60,12 @@ function visited(newNode) {
     return false;
 }
 
-var getSiblingPages = function(linkNode, parentIndex) {
+function getSiblingPages(linkNode, parentIndex) {
+    pendingRequests++;
     request("https://www.last.fm/music/" + linkNode.artist.replace(/ /g, '+') + "/+similar", function(err, response, html) {
         if (err) {
             console.log("something went wrong")
+            pendingRequests--;
             return;
         }
         var $ = cheerio.load(html);
@@ -82,10 +82,11 @@ var getSiblingPages = function(linkNode, parentIndex) {
                 counter++;
             }
         });
+        pendingRequests--;
     });
 }
 
-var startCrawl = function(artistName, totalNodes, callback) {
+function startCrawl(artistName, totalNodes, callback) {
     nodeStack.push(Node(artistName));
     console.log("Starting first request");
     request("https://www.last.fm/music/" + artistName.replace(/ /g, '+') + "/+similar", function (err, response, html) {
@@ -94,7 +95,7 @@ var startCrawl = function(artistName, totalNodes, callback) {
         var counter = 0;
         HTMLdumpToFile(html);
         $('.link-block-target').each(function(index) {
-            if (counter < 10){
+            if (counter < 8){
                 nodeStack.push(Node($(this).text()));
                 counter++;
             }
@@ -105,7 +106,7 @@ var startCrawl = function(artistName, totalNodes, callback) {
 
 // Checks if anything new is on the stack
 function watchStack(totalNodes, callback) {
-    if (nodeStack.length > 0) {
+    if (nodeStack.length > 0 && visitedNodes.length <= totalNodes) {
         currNode = nodeStack.shift();
         visitedNodes.push(currNode);
         getSiblingPages(currNode, visitedNodes.length-1);
@@ -113,18 +114,19 @@ function watchStack(totalNodes, callback) {
             console.log(visitedNodes.length);
         }
     }
-    if (visitedNodes.length >= totalNodes) {
+    if (visitedNodes.length >= totalNodes && pendingRequests == 0) {
         callback();
         return;
     } else {
         setTimeout(function() {
             watchStack(totalNodes, callback);
-        }, 700);
+        }, 10);
     }
 }
 
-startCrawl("Rush", 200, function () {
+startCrawl("King Crimson", 300, function () {
     console.log("Finished.");
+    console.log("size of nodeStack: ", nodeStack.length);
     console.log("Creating graph object for vis.js..");
     visObj = createGraphObj(visitedNodes);
     fs.writeFile("./public/visGraph.JSON", JSON.stringify(visObj), function (err) {
@@ -135,6 +137,8 @@ startCrawl("Rush", 200, function () {
     });
 });
 
+// Used for determining the contents of a page
+// before any AJAX requests have been sent.
 function HTMLdumpToFile(dat) {
     fs.writeFile("./public/dataDump.html", dat, function (err) {
         if (err) {

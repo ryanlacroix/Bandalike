@@ -1,0 +1,16 @@
+#top-bar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background-color: black;
+    height: 25px;
+    z-index: 1000;
+}
+
+h5 {
+    font-size: 20px;
+    color: white;
+    padding-left: 5px;
+    margin-top: 0px;
+}

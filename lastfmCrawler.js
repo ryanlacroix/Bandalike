@@ -27,12 +27,12 @@ function createGraphObj(visitedNodes) {
     var edges = [];
     for (var i = 0; i < visitedNodes.length; i++) {
         newNode = {id: visitedNodes[i].artist, label: visitedNodes[i].artist, size: 5};
+        // Add edges from this node to all of its children
+        for (var j = 0; j < visitedNodes[i].children.length; j++) {
+            edges.push({from: visitedNodes[i].artist, to: visitedNodes[i].children[j].artist});
+        }
         if (!alreadyContains(newNode, nodes)) {
             nodes.push(newNode);
-            // Add edges from this node to all of its children
-            for (var j = 0; j < visitedNodes[i].children.length; j++) {
-                edges.push({from: visitedNodes[i].artist, to: visitedNodes[i].children[j].artist});
-            }
         } else {
             continue;
         }
@@ -73,7 +73,6 @@ function getSiblingPages(linkNode, parentIndex) {
         $('.link-block-target').each(function(index) {
             if (counter < 10) {
                 var newNode = Node($(this).text());
-                console.log(newNode.artist);
                 newNode.parentIndex = parentIndex;
                 if (!visited(newNode)) {
                     linkNode.children.push(newNode);
@@ -124,18 +123,25 @@ function watchStack(totalNodes, callback) {
     }
 }
 
-startCrawl("King Crimson", 300, function () {
-    console.log("Finished.");
-    console.log("size of nodeStack: ", nodeStack.length);
-    console.log("Creating graph object for vis.js..");
-    visObj = createGraphObj(visitedNodes);
-    fs.writeFile("./public/visGraph.JSON", JSON.stringify(visObj), function (err) {
-        if (err) {
-            return console.log(err);
-        }
-        console.log("successfully saved JSON file");
+function getBands(name, numResults, callback) {
+    // Reset global variables
+    nodeStack = [];
+    visitedNodes = [];
+    pendingRequests = 0;
+    startCrawl(name, numResults, function () {
+        console.log("Finished.");
+        console.log("size of nodeStack: ", nodeStack.length);
+        console.log("Creating graph object for vis.js..");
+        visObj = createGraphObj(visitedNodes);
+        fs.writeFile("./public/visGraph.JSON", JSON.stringify(visObj), function (err) {
+            if (err) {
+                return console.log(err);
+            }
+            console.log("successfully saved JSON file");
+            callback(JSON.stringify(visObj));
+        });
     });
-});
+}
 
 // Used for determining the contents of a page
 // before any AJAX requests have been sent.
@@ -147,3 +153,5 @@ function HTMLdumpToFile(dat) {
         console.log("successfully dumped to file");
     });
 }
+
+module.exports.getBands = getBands;

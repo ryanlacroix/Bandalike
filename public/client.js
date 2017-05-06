@@ -11,12 +11,9 @@ function drawGraph(data) {
     $('#loading-screen').remove();
     var container = document.getElementById('graph');
     var options = {
-        physics: { 
-            stabilization: false
-        },
-        nodes: {
-            shape: 'triangle'
-        }
+        layout: {improvedLayout:false},
+        physics: {stabilization: false},
+        nodes: {shape: 'triangle'}
       };
       console.log(data);
     var graph = new vis.Network(container, JSON.parse(data), options);

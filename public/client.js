@@ -1,12 +1,14 @@
 window.onload = function() {
+    loadFlasher();
     $.ajax({
         method : "GET",
-        url: '/visGraph.JSON',
+        url: '/search/Rush',
         success: drawGraph
-    })
+    });
 }
 
 function drawGraph(data) {
+    $('#loading-screen').remove();
     var container = document.getElementById('graph');
     var options = {
         physics: { 
@@ -14,10 +16,17 @@ function drawGraph(data) {
         },
         nodes: {
             shape: 'triangle'
-            //shapeProperties: {
-            //    size: 2
-            //}
         }
       };
-    var graph = new vis.Network(container, data, options);
+      console.log(data);
+    var graph = new vis.Network(container, JSON.parse(data), options);
+}
+
+function loadFlasher() { 
+    $('#loading-screen').animate({ 
+        opacity: 0.1, 
+    }, 500, 'linear') 
+    .animate({ 
+        opacity: 1 
+    }, 500, 'linear', loadFlasher);
 }

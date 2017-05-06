@@ -19,3 +19,14 @@ h5 {
     margin-top: 3px;
     font-family: 'Orbitron', sans-serif;
 }
+
+#loading-screen { 
+    padding-top: 25px; 
+} 
+ 
+h6 { 
+    align-content: center; 
+    position: absolute; 
+    top:50%; 
+    left:50%; 
+}

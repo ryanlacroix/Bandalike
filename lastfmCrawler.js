@@ -29,7 +29,9 @@ function createGraphObj(visitedNodes) {
         newNode = {id: visitedNodes[i].artist, label: visitedNodes[i].artist, size: 5};
         // Add edges from this node to all of its children
         for (var j = 0; j < visitedNodes[i].children.length; j++) {
-            edges.push({from: visitedNodes[i].artist, to: visitedNodes[i].children[j].artist});
+            if (!edgePresent(visitedNodes[i].artist, visitedNodes[i].children[j].artist, edges)) {
+                edges.push({from: visitedNodes[i].artist, to: visitedNodes[i].children[j].artist});
+            }
         }
         if (!alreadyContains(newNode, nodes)) {
             nodes.push(newNode);
@@ -44,6 +46,16 @@ function createGraphObj(visitedNodes) {
 function alreadyContains(node, lis) {
     for (var i = 0; i < lis.length; i++) {
         if (node.id === lis[i].id) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Check if an edge already exists
+function edgePresent(n1, n2, edges) {
+    for (var i = 0; i < edges.length; i++) {
+        if (edges[i].from === n1 && edges[i].to === n2){
             return true;
         }
     }

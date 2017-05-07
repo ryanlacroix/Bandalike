@@ -13,7 +13,7 @@ app.use("*", function (req, res, next) {
 app.get('/search/:bandName', function (req, res) {
     console.log('received request for search');
     console.log(req.params.bandName);
-    crawler.getBands(req.params.bandName, 100, function (data) {
+    crawler.getBands(req.params.bandName, 200, function (data) {
         console.log(data);
         res.send(data);
     });

@@ -103,6 +103,12 @@ function startCrawl(artistName, totalNodes, callback) {
     request("https://www.last.fm/music/" + artistName.replace(/ /g, '+') + "/+similar", function (err, response, html) {
         console.log("Request successful!");
         var $ = cheerio.load(html);
+        // Check for invalid artist name
+        console.log($('img[alt="Sad Marvin the robot"]').length);
+        if ($('img[alt="Sad Marvin the robot"]').length > 0) {
+            callback("ERROR");
+            return;
+        }
         var counter = 0;
         HTMLdumpToFile(html);
         $('.link-block-target').each(function(index) {
@@ -140,7 +146,11 @@ function getBands(name, numResults, callback) {
     nodeStack = [];
     visitedNodes = [];
     pendingRequests = 0;
-    startCrawl(name, numResults, function () {
+    startCrawl(name, numResults, function (resultMsg) {
+        if (resultMsg === "ERROR") {
+            callback(JSON.stringify({ error: resultMsg }));
+            return;
+        }
         console.log("Finished.");
         console.log("size of nodeStack: ", nodeStack.length);
         console.log("Creating graph object for vis.js..");

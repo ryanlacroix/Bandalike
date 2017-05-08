@@ -1,4 +1,5 @@
 var searching = false;
+var oldQuery = false;
 
 window.onload = function () {
     $('#name-tag').click(function () {
@@ -6,6 +7,10 @@ window.onload = function () {
     });
     $('#submit-search').click(newSearch);
     $('#search-box').click(function () {
+        if (oldQuery) {
+            $(this).val("");
+            oldQuery = false;
+        }
         $('#intro-info').fadeOut(300, function () {
             $(this).remove();
         });
@@ -13,11 +18,8 @@ window.onload = function () {
 }
 
 function drawGraph(data) {
+    oldQuery = true;
     data = JSON.parse(data);
-    /*if($.type(data) === "string") {
-        // Fixes weird problem with objects sometimes not being parsed
-        data = JSON.parse(data);
-    }*/
     if (data.error != undefined) {
         alert("Artist wasn't found :(");
         searching = false;

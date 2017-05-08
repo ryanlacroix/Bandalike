@@ -19,7 +19,6 @@
     background-color: black;
     height: 25px;
     z-index: 1000;
-    display: inline-flex;
     justify-content: right;
 }
 
@@ -30,6 +29,7 @@
     padding-top: 3px;
     transition: 1s;
     cursor: pointer;
+    float: right;
 }
 #name-tag:hover {
     color: yellow;
